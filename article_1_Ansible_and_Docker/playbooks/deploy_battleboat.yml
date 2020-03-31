@@ -15,13 +15,6 @@
       path: "{{ home }}/{{ project_name }}"
       state: "directory"
 
-#  - name: "Copy devops private keys file"
-#    copy:
-#      src: "files/devops_private_keys"
-#      dest: "{{ home }}/.ssh/id_rsa"
-#      mode: "0644" 
-#      owner: "centos"
-
   - name: "Download fake-backend source code"
     git:
       repo: "{{ fake_backend_git_url }}" 
@@ -100,3 +93,7 @@
         DATABASE_PORT: "{{ DATABASE_PORT }}"
 
 
+  - name: "Delete temporary downloaded sources code from git "
+    file:
+      path: "{{ home }}/fake-backend"
+      state: "absen"
