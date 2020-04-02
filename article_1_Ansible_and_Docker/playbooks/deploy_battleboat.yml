@@ -21,8 +21,8 @@
       dest: "{{ home }}/fake-backend"
       force: "yes"
       recursive: "no"
-      key_file: "{{ home }}/.ssh/id_rsa"
-      accept_hostkey: "yes"
+#      key_file: "{{ home }}/.ssh/id_rsa"
+#      accept_hostkey: "yes"
 
   - name: "Build fake-backend image and push on DockerHub"
     docker_image:
@@ -55,14 +55,14 @@
     docker_container:
       name: "{{ database_mysql_container_name }}"
       hostname: "{{ database_mysql_container_hostname }}"
-      image: "mysql:5.7"
+      image: "{{ database_image }}"
       state: "started"
       volumes: 
         -  "/etc/VOLUMES/mysql_lib:/var/lib/mysql"
       networks:
         - name: "{{ battleboat_network }}"
       ports:
-        - "3306:3306"
+        - "{{ DATABASE_PORT }}:{{ DATABASE_PORT }}"
       restart_policy: "always"
       env:
         MYSQL_ROOT_PASSWORD: "{{ MYSQL_ROOT_PASSWORD }}"
@@ -83,7 +83,7 @@
       networks:
         - name: "{{ battleboat_network }}"
       ports:
-        - "8181:3000"
+        - "{{ battleboat_port }}:3000"
       restart_policy: "always"
       env:
         DATABASE_HOST: "{{ DATABASE_HOST }}"

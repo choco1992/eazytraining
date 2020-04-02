@@ -1,16 +1,38 @@
 ansible_user: "centos"
+home: "/home/centos"
+project_name: "battleboat"
+
+####  Variables de l'application  ####
 MYSQL_ROOT_PASSWORD: "rootpwdCHOCO"
 MYSQL_DATABASE: "battleboat"
 MYSQL_USER: "battleuser"
 MYSQL_PASSWORD: "battlepass"
+fake_backend_git_url: "https://github.com/alexandrevilain/fake-backend.git"
+fake_backend_image_tag: "1.0"
+battleboat_network: "battleboat"
+fake_backend_container_name: "battleboatCHOCO"
+fake_backend_container_hostname: "battleboatCHOCO"
+battleboat_port: "8181"
 
+
+####  Variables de la base de données  ####
 DATABASE_HOST: "dbCHOCO"
 DATABASE_NAME: "battleboat"
 DATABASE_USER: "battleuser"
 DATABASE_PASSWORD: "battlepass"
 DATABASE_PORT: "3306"
+database_mysql_container_name: "dbCHOCO"
+database_mysql_container_hostname: "dbCHOCO"
+database_image: "mysql:5.7"
 
-docker_hub_login: "choco1992"
+####  Variables de d'authentification au dockerhub (Elles sont cryptées via ansible_vault) ####
+docker_hub_login: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          37323465303065643834383630653765386430656333663035363537313161613630613833623362
+          3963633064326238656466643766343661323966353730350a353438303763303938343536633334
+          64313432323834643137353731343164303131363864396666636266333265613039313563383061
+          6532303637396233390a353637303338346136316631333261613766336665623263646265346134
+          3863
 docker_hub_email: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           61633063323234646539333230663836373965656361303230393339303334313534373830623039
@@ -18,7 +40,6 @@ docker_hub_email: !vault |
           39373862343263653137646164323264356664346262346131396639653765323238373334396438
           3263313835326464620a383461343137343539363062303036626664313065323365316637623264
           39626239363765616264343939313239356234376665323931303565613535643436
-
 docker_hub_password: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           65396337316339623564323064333532363333323062366332623966336237343663323738383730
@@ -28,16 +49,3 @@ docker_hub_password: !vault |
           3634
 
 
-home: "/home/centos"
-project_name: "battleboat"
-
-fake_backend_git_url: "https://github.com/alexandrevilain/fake-backend.git"
-fake_backend_image_tag: "1.0"
-battleboat_network: "battleboat"
-
-
-database_mysql_container_name: "dbCHOCO"
-database_mysql_container_hostname: "dbCHOCO"
-
-fake_backend_container_name: "battleboatCHOCO"
-fake_backend_container_hostname: "battleboatCHOCO"
