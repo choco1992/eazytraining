@@ -96,4 +96,4 @@
   - name: "Delete temporary downloaded sources code from git "
     file:
       path: "{{ home }}/fake-backend"
-      state: "absen"
+      state: "absent"
