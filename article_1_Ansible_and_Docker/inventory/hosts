@@ -1,5 +1,6 @@
 [STAGING]
-ec2-3-88-151-140.compute-1.amazonaws.com
+{SERVEUR_DE_STAGING}                       # remplacer par votre serveurs
 
 [PROD]
-ec2-107-22-106-27.compute-1.amazonaws.com
+{SERVEUR_DE_PRODUCTION}                    # remplacer par votre serveurs
+
