@@ -1,40 +1,40 @@
 ---
-- hosts: all
+- hosts: all                                        # Le playbook sera lancé sur les deux machines, production et staging
   name: "Deploy Pozos API "
-  become: true
+  become: true                                      # Le playbook pourra passer en root sur les serveurs
   tags: deploy-battleboat
   tasks: 
-  - name: "log into Dockerhub" 
+  - name: "log into Dockerhub"                      # Connexion / logging sur notre registre docker
     docker_login:
       username: "{{ docker_hub_login }}"
       email: "{{ docker_hub_email }}"
       password: "{{ docker_hub_password }}"
 
-  - name: "Create project Workdir "
+  - name: "Create project Workdir "                 # Création d'un répertoire de travail qui sera supprimé à la fin du playbook
     file:
       path: "{{ home }}/{{ project_name }}"
       state: "directory"
 
-  - name: "Download fake-backend source code"
+  - name: "Download fake-backend source code"       # Téléchargement du code source de l'application sur github (Dockerfile y compris)
     git:
       repo: "{{ fake_backend_git_url }}" 
       dest: "{{ home }}/fake-backend"
       force: "yes"
       recursive: "no"
 
-  - name: "Build fake-backend image and push on DockerHub"
+  - name: "Build fake-backend image and push on DockerHub"       # Build de l'image à partir des sources téléchargées, et envoi sur le registre docker
     docker_image:
       path: "{{ home }}/fake-backend"
       name: "{{ docker_hub_login }}/fake-backend" 
       push: "yes"
       tag: "{{ fake_backend_image_tag }}"
 
-  - name: "Create docker network"
+  - name: "Create docker network"                  # Création d'un réseau dans Docker, pour l'interconnexion de l'application et la base de données
     docker_network:
       name: "{{ battleboat_network }}"
 
 
-  - name: "Create volumes folders "
+  - name: "Create volumes folders "                # Création des point de montage des volumes docker
     file:
       path: "/etc/VOLUMES/{{ item }}"
       state: "directory"
@@ -42,27 +42,27 @@
       - "mysql_lib"
       - "battleboat-gh-pages"
 
-  - name: "Push html webapp file for testing"
+  - name: "Push html webapp file for testing"     # Envoi de page html sur le site 
     copy:
       src: "files/battleboat/"
       dest: "/etc/VOLUMES/battleboat-gh-pages"
       mode: "0644" 
       owner: "centos"
 
-  - name: "Deploy Database container" 
+  - name: "Deploy Database container"            # Lancement du container Base de données, avec les caractéristiques définies
     docker_container:
       name: "{{ database_mysql_container_name }}"
       hostname: "{{ database_mysql_container_hostname }}"
       image: "{{ database_image }}"
       state: "started"
       volumes: 
-        -  "/etc/VOLUMES/mysql_lib:/var/lib/mysql"
-      networks:
+        -  "/etc/VOLUMES/mysql_lib:/var/lib/mysql"    # Montage le volume de la base données dans le point de montage crée précédemment
+      networks:                                       # Association du container dans la réseau docker déployé précédemment
         - name: "{{ battleboat_network }}"
-      ports:
+      ports:                                          # Binding du port du container avec celui de l'hôte Docker
         - "{{ DATABASE_PORT }}:{{ DATABASE_PORT }}"
       restart_policy: "always"
-      env:
+      env:                                            # Définition des variables d'environnement du container
         MYSQL_ROOT_PASSWORD: "{{ MYSQL_ROOT_PASSWORD }}"
         MYSQL_DATABASE: "{{ MYSQL_DATABASE }}"
         MYSQL_USER: "{{ MYSQL_USER }}"
@@ -70,20 +70,20 @@
 
 
 
-  - name: "Deploy fake-backend container" 
+  - name: "Deploy fake-backend container"             # Lancement de l'application
     docker_container:
       name: "{{ fake_backend_container_name }}"
       hostname: "{{ fake_backend_container_hostname }}"
       image: "{{ docker_hub_login }}/fake-backend:{{ fake_backend_image_tag }}"
       state: "started"
-      volumes: 
+      volumes:                                        # Montage du volume de l'application
         -  "/etc/VOLUMES/battleboat-gh-pages:/etc/backend/static"
-      networks:
+      networks:                                       # Association du container de l'appli dans la réseau docker déployé précédemment
         - name: "{{ battleboat_network }}"
-      ports:
+      ports:                                          # Binding du port du container avec celui de l'hôte Docker
         - "{{ battleboat_port }}:3000"
       restart_policy: "always"
-      env:
+      env:                                            # Définition des variables d'environnement du container
         DATABASE_HOST: "{{ DATABASE_HOST }}"
         DATABASE_NAME: "{{ DATABASE_NAME }}"
         DATABASE_USER: "{{ DATABASE_USER }}"
@@ -91,7 +91,7 @@
         DATABASE_PORT: "{{ DATABASE_PORT }}"
 
 
-  - name: "Delete temporary downloaded sources code from git "
+  - name: "Delete temporary downloaded sources code from git " # Suppression du répertoire de travail 
     file:
       path: "{{ home }}/fake-backend"
       state: "absent"
